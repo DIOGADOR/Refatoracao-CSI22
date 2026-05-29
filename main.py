@@ -8,10 +8,7 @@ class Background:
     """
     Esta classe define o Plano de Fundo do jogo
     """
-    image = None
-    margin_left = None
-    margin_right = None
-
+     
     def __init__(self):
 
         background_fig = pygame.image.load("Images/background.png")
@@ -41,54 +38,14 @@ class Background:
 
     # Define posições do Plano de Fundo para criar o movimento
     def move (self, screen, movL_x, movL_y, movR_x, movR_y):
+        screen_height = screen.get_height()
+        step_height = 600
+        offsets = range(-4800, screen_height + step_height, step_height)
+        for offset in offsets:
+            screen.blit(self.image, (movL_x, movL_y + offset))
+            screen.blit(self.margin_left, (movL_x, movL_y + offset))
+            screen.blit(self.margin_right, (movR_x, movR_y + offset))
 
-        #movimento background
-        screen.blit(self.image, (movL_x, movL_y))
-        screen.blit(self.image, (movL_x, movL_y + 600))
-        screen.blit(self.image, (movL_x, movL_y + 1200))
-        screen.blit(self.image, (movL_x, movL_y + 1800))
-        screen.blit(self.image, (movL_x, movL_y + 2400))
-        screen.blit(self.image, (movL_x, movL_y + 3000))
-        screen.blit(self.image, (movL_x, movL_y - 600))
-        screen.blit(self.image, (movL_x, movL_y - 1200))
-        screen.blit(self.image, (movL_x, movL_y - 1800))
-        screen.blit(self.image, (movL_x, movL_y - 2400))
-        screen.blit(self.image, (movL_x, movL_y - 3000))
-        screen.blit(self.image, (movL_x, movL_y - 3600))
-        screen.blit(self.image, (movL_x, movL_y - 4200))
-        screen.blit(self.image, (movL_x, movL_y - 4800))
-
-        # movimento margem esquerda
-        screen.blit(self.margin_left, (movL_x, movL_y))
-        screen.blit(self.margin_left, (movL_x, movL_y + 600))
-        screen.blit(self.margin_left, (movL_x, movL_y + 1200))
-        screen.blit(self.margin_left, (movL_x, movL_y + 1800))
-        screen.blit(self.margin_left, (movL_x, movL_y + 2400))
-        screen.blit(self.margin_left, (movL_x, movL_y + 3000))
-        screen.blit(self.margin_left, (movL_x, movL_y - 600))
-        screen.blit(self.margin_left, (movL_x, movL_y - 1200))
-        screen.blit(self.margin_left, (movL_x, movL_y - 1800))
-        screen.blit(self.margin_left, (movL_x, movL_y - 2400))
-        screen.blit(self.margin_left, (movL_x, movL_y - 3000))
-        screen.blit(self.margin_left, (movL_x, movL_y - 3600))
-        screen.blit(self.margin_left, (movL_x, movL_y - 4200))
-        screen.blit(self.margin_left, (movL_x, movL_y - 4800))
-
-        # movimento margem direita
-        screen.blit(self.margin_right, (movR_x, movR_y))
-        screen.blit(self.margin_right, (movR_x, movR_y + 600))
-        screen.blit(self.margin_right, (movR_x, movR_y + 1200))
-        screen.blit(self.margin_right, (movR_x, movR_y + 1800))
-        screen.blit(self.margin_right, (movR_x, movR_y + 2400))
-        screen.blit(self.margin_right, (movR_x, movR_y + 3000))
-        screen.blit(self.margin_right, (movR_x, movR_y - 600))
-        screen.blit(self.margin_right, (movR_x, movR_y - 1200))
-        screen.blit(self.margin_right, (movR_x, movR_y - 1800))
-        screen.blit(self.margin_right, (movR_x, movR_y - 2400))
-        screen.blit(self.margin_right, (movR_x, movR_y - 3000))
-        screen.blit(self.margin_right, (movR_x, movR_y - 3600))
-        screen.blit(self.margin_right, (movR_x, movR_y - 4200))
-        screen.blit(self.margin_right, (movR_x, movR_y - 4800))
     # move()
 # Background:
 
@@ -96,10 +53,6 @@ class Player:
     """
     Classe Jogador
     """
-    image = None
-    x = None
-    y = None
-
     def __init__(self, x, y):
         player_fig = pygame.image.load("Images/player.png")
         player_fig.convert()
@@ -117,10 +70,6 @@ class Player:
 
 class Hazard:
 
-    image = None
-    x = None
-    y = None
-
     def __init__(self, img, x, y):
         hazard_fig = pygame.image.load(img)
         hazard_fig.convert()
@@ -137,22 +86,16 @@ class Hazard:
 # Hazard:
 
 class Game:
-    screen = None
-    screen_size = None
-    width = 800
-    height = 600
-    run = True
-    background = None
-    player = None
-    hazard_1 = hazard_2 = hazard_3 = hazard_4 = hazard_5 = None
-    render_text_bateulateral = None
-    render_text_perdeu = None
 
-    # movimento do Player
+    #Atributos de classe do Game
+    WIDTH = 800
+    HEIGHT = 600
     DIREITA = pygame.K_RIGHT
     ESQUERDA = pygame.K_LEFT
-    mudar_x = 0.0
-
+    VELOCIDADE_BACKGROUND = 5
+    VELOCIDADE_HAZARD = 7
+    H_WIDTH = 130
+    H_HEIGHT = 130
 
     def __init__(self, size, fullscreen):
 
@@ -163,7 +106,7 @@ class Game:
 
         pygame.init()
 
-        self.screen = pygame.display.set_mode((self.width, self.height))  # tamanho da tela
+        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))  # tamanho da tela
         self.screen_size = self.screen.get_size()
 
         pygame.mouse.set_visible(0)
@@ -175,6 +118,13 @@ class Game:
         # Mensagens para o jogador
         self.render_text_bateulateral = my_font.render("COLISÃO!", 0,(255, 255, 255))  # ("texto", opaco/transparente 0/1, cor do texto)
         self.render_text_perdeu = my_font.render("GAME OVER!", 0, (255, 0, 0))  # ("texto, opaco/transparente 0/1, cor do texto)
+
+        # Variáveis para o loop do jogo 
+        self.run = True
+        self.background = None
+        self.player = None
+        self.hazard_1 = self.hazard_2 = self.hazard_3 = self.hazard_4 = self.hazard_5 = None
+        self.mudar_x = 0.0
 
     # init()
 
@@ -252,18 +202,10 @@ class Game:
         h_passou = 0
 
         # variáveis para movimento de Plano de Fundo/Background
-        velocidade_background = 5
-        velocidade_hazard = 7
-
-        faixaA_x = 375
-        faixaA_y = 0
         hzrd = 0
         h_x = random.randrange(125, 660)
         h_y = -500
 
-        # Info Hazard
-        h_width = 130 #55
-        h_height = 130 #120
 
         # movimento da margem esquerda
         movL_x = 0
@@ -277,8 +219,8 @@ class Game:
         self.background = Background()
 
         # Posicao do Player
-        x = (self.width - 56) / 2
-        y = self.height - 125
+        x = (self.WIDTH - 56) / 2
+        y = self.HEIGHT - 125
 
         # Criar o Player
         self.player = Player(x, y)
@@ -319,13 +261,13 @@ class Game:
             # adiciona movimento ao background
 
             self.move_background (movL_x, movL_y, movR_x, movR_y)
-            movL_y = movL_y + velocidade_background
-            movR_y = movR_y + velocidade_background
+            movL_y = movL_y + self.VELOCIDADE_BACKGROUND
+            movR_y = movR_y + self.VELOCIDADE_BACKGROUND
 
             #se a imagem ultrapassar a extremidade da tela, move de volta
-            if movL_y > 640 and movR_y > 640:
-                movL_y -= 640
-                movR_y -= 640
+            if movL_y > self.HEIGHT and movR_y > self.HEIGHT:
+                movL_y -= self.HEIGHT
+                movR_y -= self.HEIGHT
 
             # Altera a coordenada x do Player de acordo comas mudanças no event_handle() para ele se mover
             x = x + self.mudar_x
@@ -346,24 +288,23 @@ class Game:
                 self.run = False
 
             # adicionando movimento ao hazard
-            h_y = h_y + velocidade_hazard / 4
+            h_y = h_y + self.VELOCIDADE_HAZARD / 4
             self.draw_hazard(hzrd, h_x, h_y)
-            h_y = h_y + velocidade_hazard
+            h_y = h_y + self.VELOCIDADE_HAZARD
 
             # definindo onde hazard vai aparecer, recomeçando a posição do obstaculo e da faixa
-            if h_y > self.height:
-                h_y = 0 - h_height
-                faixaA_y = 0
-                h_x = random.randrange(125, 650 - h_height)
+            if h_y > self.HEIGHT:
+                h_y = 0 - self.H_HEIGHT
+                h_x = random.randrange(125, 650 - self.H_HEIGHT)
                 hzrd = random.randint(0, 4)
                 # determinando quantos hazard passaram e a pontuação
                 h_passou = h_passou + 1
                 score = h_passou * 10
 
             # restrições para o game over
-            if y < h_y + h_height:
+            if y < h_y + self.H_HEIGHT:
                 if x > h_x or x > h_x - 56:
-                    if x < h_x + h_width or x < h_x - 56:
+                    if x < h_x + self.H_WIDTH or x < h_x - 56:
                         self.screen.blit(self.render_text_perdeu, (80, 200))
                         pygame.display.update()
                         time.sleep(3)
