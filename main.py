@@ -217,6 +217,15 @@ class Game:
         screen.blit(score, (0, SCORE_VALUE_Y))
     #score_card()
 
+    def _player_collides_with_hazard(self, h_x, h_y):
+        px, py = self.player.x, self.player.y
+        return (
+            px < h_x + self.H_WIDTH
+            and px + PLAYER_WIDTH > h_x
+            and py < h_y + self.H_HEIGHT
+            and py + PLAYER_HEIGHT > h_y
+        )
+
     def loop(self):
         """
         Laço principal
@@ -312,16 +321,13 @@ class Game:
                 h_passou = h_passou + 1
                 score = h_passou * 10
 
-            # restrições para o game over (Acessando self.player.y e self.player.x encapsulados)
-            if self.player.y < h_y + self.H_HEIGHT:
-                if self.player.x > h_x or self.player.x > h_x - 56:
-                    if self.player.x < h_x + self.H_WIDTH or self.player.x < h_x - 56:
-                        self.screen.blit(
-                            self.render_text_perdeu, (MESSAGE_POS_X, MESSAGE_POS_Y)
-                        )
-                        pygame.display.update()
-                        time.sleep(3)
-                        self.run = False
+            if self._player_collides_with_hazard(h_x, h_y):
+                self.screen.blit(
+                    self.render_text_perdeu, (MESSAGE_POS_X, MESSAGE_POS_Y)
+                )
+                pygame.display.update()
+                time.sleep(3)
+                self.run = False
 
             # atualizando a tela
             pygame.display.update()
