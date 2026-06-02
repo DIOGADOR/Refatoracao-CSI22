@@ -283,8 +283,12 @@ class Game:
             # Mostrar score
             self.score_card(self.screen, h_passou, score)
 
-            # Restrições do movimento do Player (Acessando self.player.x encapsulado)
-            if self.player.x > PLAY_AREA_RIGHT or self.player.x < PLAY_AREA_LEFT:
+            if self.player.x > PLAY_AREA_RIGHT:
+                self.player.x = PLAY_AREA_RIGHT
+            elif self.player.x < PLAY_AREA_LEFT:
+                self.player.x = PLAY_AREA_LEFT
+
+            if self.player.x >= PLAY_AREA_RIGHT or self.player.x <= PLAY_AREA_LEFT:
                 self.screen.blit(
                     self.render_text_bateulateral, (MESSAGE_POS_X, MESSAGE_POS_Y)
                 )
@@ -300,9 +304,7 @@ class Game:
                     movL_y,
                     movR_x,
                     movR_y,
-                ) = self._reset_round(
-                    score, h_passou, hzrd, h_x, h_y, movL_x, movL_y, movR_x, movR_y
-                )
+                ) = self._reset_round()
                 continue
 
             active_hazard = self.hazards[hzrd]
