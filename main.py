@@ -30,14 +30,9 @@ class Background:
         pass
     # update()
 
-    def draw(self, screen):
-        screen.blit(self.image, (0, 0))
-        screen.blit(self.margin_left, (0, 0))
-        screen.blit(self.margin_right, (740, 0))
-    # draw()
-
+    # Renomeado de "move" para "draw"
     # Define posições do Plano de Fundo para criar o movimento
-    def move (self, screen, movL_x, movL_y, movR_x, movR_y):
+    def draw(self, screen, movL_x, movL_y, movR_x, movR_y):
         screen_height = screen.get_height()
         step_height = 600
         offsets = range(-4800, screen_height + step_height, step_height)
@@ -62,10 +57,15 @@ class Player:
         self.y = y
     # __init__()
 
-    # Desenhar Player
-    def draw (self, screen, x, y):
-        screen.blit(self.image, (x, y))
-    #draw()
+    # Atualiza a posição do Player
+    def update(self, mudar_x):
+        self.x += mudar_x
+    # update()
+
+    # Desenhar Player (não recebe mais x e y externos)
+    def draw(self, screen):
+        screen.blit(self.image, (self.x, self.y))
+    # draw()
 # Player:
 
 class Hazard:
@@ -87,7 +87,7 @@ class Hazard:
 
 class Game:
 
-    #Atributos de classe do Game
+    # Atributos de classe do Game
     WIDTH = 800
     HEIGHT = 600
     DIREITA = pygame.K_RIGHT
@@ -97,13 +97,12 @@ class Game:
     H_WIDTH = 130
     H_HEIGHT = 130
 
-    def __init__(self, size, fullscreen):
-
+    # TAREFA 4.8: Parâmetros size e fullscreen removidos da assinatura
+    def __init__(self):
         """
         Função que inicializa o pygame, define a resolução da tela,
         caption, e desabilita o mouse.
         """
-
         pygame.init()
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))  # tamanho da tela
@@ -116,16 +115,15 @@ class Game:
         my_font = pygame.font.Font("Fonts/Fonte4.ttf", 100)
 
         # Mensagens para o jogador
-        self.render_text_bateulateral = my_font.render("COLISÃO!", 0,(255, 255, 255))  # ("texto", opaco/transparente 0/1, cor do texto)
-        self.render_text_perdeu = my_font.render("GAME OVER!", 0, (255, 0, 0))  # ("texto, opaco/transparente 0/1, cor do texto)
+        self.render_text_bateulateral = my_font.render("COLISÃO!", 0,(255, 255, 255))
+        self.render_text_perdeu = my_font.render("GAME OVER!", 0, (255, 0, 0))
 
-        # Variáveis para o loop do jogo 
+        # Variáveis para o loop do jogo
         self.run = True
         self.background = None
         self.player = None
         self.hazard_1 = self.hazard_2 = self.hazard_3 = self.hazard_4 = self.hazard_5 = None
         self.mudar_x = 0.0
-
     # init()
 
     def handle_events(self):
@@ -133,16 +131,13 @@ class Game:
         Trata o evento e toma a ação necessária.
         """
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 self.run = False
 
             # se clicar em qualquer tecla, entra no if
             if event.type == pygame.KEYDOWN:
-                # se clicar na seta da esquerda, anda 3 para a esquerda no eixo x
                 if event.key == self.ESQUERDA:
                     self.mudar_x = -3
-                # se clicar na seta da direita, anda 3 para a direita no eixo x
                 if event.key == self.DIREITA:
                     self.mudar_x = 3
 
@@ -150,21 +145,13 @@ class Game:
             if event.type == pygame.KEYUP:
                 if event.key == self.ESQUERDA or event.key == self.DIREITA:
                     self.mudar_x = 0
-
     # handle_events()
 
     def elements_update(self, dt):
         self.background.update(dt)
     # elements_update()
 
-    def elements_draw(self):
-        self.background.draw(self.screen)
-    # elements_draw()
-
-    # Desenha o Player
-    def draw_player (self, x, y):
-        self.player.draw (self.screen, x, y)
-    # draw_player()
+    # Os métodos inúteis (elements_draw, draw_player e move_background) foram totalmente deletados daqui!
 
     # Desenha Hazard
     def draw_hazard (self, hzrd, x, y):
@@ -179,11 +166,6 @@ class Game:
         elif hzrd == 4:
             self.hazard_5.draw(self.screen, x, y)
     # draw_hazard()
-
-    # Define as posições dos objetos para criar o movimento
-    def move_background (self, obj_movL_x, obj_movL_y, obj_movR_x, obj_movR_y):
-        self.background.move (self.screen, obj_movL_x, obj_movL_y, obj_movR_x,obj_movR_y)
-    # move_background()
 
     # Informa a quantidade de hazard que passaram e a Pontuação
     def score_card(self, screen, h_passou, score):
@@ -206,7 +188,6 @@ class Game:
         h_x = random.randrange(125, 660)
         h_y = -500
 
-
         # movimento da margem esquerda
         movL_x = 0
         movL_y = 0
@@ -218,30 +199,21 @@ class Game:
         # Criar o Plano de fundo
         self.background = Background()
 
-        # Posicao do Player
-        x = (self.WIDTH - 56) / 2
-        y = self.HEIGHT - 125
+        # Posicao INICIAL do Player
+        x_inicial = (self.WIDTH - 56) / 2
+        y_inicial = self.HEIGHT - 125
 
-        # Criar o Player
-        self.player = Player(x, y)
+        # Criar o Player (o objeto agora guarda e atualiza seu x e y internamente)
+        self.player = Player(x_inicial, y_inicial)
 
-        # Criar Harzard_1
+        # Criar Harzard_1 a 5
         self.hazard_1 = Hazard("Images/nave.png", h_x, h_y)
-
-        # Criar Harzard_2
         self.hazard_2 = Hazard("Images/satelite.png", h_x, h_y)
-
-        # Criar Harzard_3
         self.hazard_3 = Hazard("Images/cometa.png", h_x, h_y)
-
-        # Criar Harzard_4
         self.hazard_4 = Hazard("Images/planeta.png", h_x, h_y)
-
-        # Criar Harzard_5
         self.hazard_5 = Hazard("Images/ameaca.png", h_x, h_y)
 
-        # Inicializamos o relogio e o dt que vai limitar o valor de FPS
-        # frames por segundo do jogo
+        # Inicializamos o relogio e o dt
         clock = pygame.time.Clock()
         dt = 16
 
@@ -255,32 +227,27 @@ class Game:
             # Atualiza Elementos
             self.elements_update(dt)
 
-            # Desenha o background buffer
-            self.elements_draw()
+            # Fundo agora é renderizado e movido em uma única chamada coesa
+            self.background.draw(self.screen, movL_x, movL_y, movR_x, movR_y)
 
-            # adiciona movimento ao background
-
-            self.move_background (movL_x, movL_y, movR_x, movR_y)
+            # incrementa eixo Y para rolar o fundo
             movL_y = movL_y + self.VELOCIDADE_BACKGROUND
             movR_y = movR_y + self.VELOCIDADE_BACKGROUND
 
-            #se a imagem ultrapassar a extremidade da tela, move de volta
+            # se a imagem ultrapassar a extremidade da tela, move de volta
             if movL_y > self.HEIGHT and movR_y > self.HEIGHT:
                 movL_y -= self.HEIGHT
                 movR_y -= self.HEIGHT
 
-            # Altera a coordenada x do Player de acordo comas mudanças no event_handle() para ele se mover
-            x = x + self.mudar_x
-
-            # Mostrar Player
-            self.draw_player (x, y)
+            # O Player processa sua física e desenha a si mesmo
+            self.player.update(self.mudar_x)
+            self.player.draw(self.screen)
 
             # Mostrar score
             self.score_card(self.screen, h_passou, score)
 
-            # Restrições do movimento do Player
-            # Se o Player bate na lateral não é Game Over
-            if x > 760 - 92 or x < 40 + 5:
+            # Restrições do movimento do Player (Acessando self.player.x encapsulado)
+            if self.player.x > 760 - 92 or self.player.x < 40 + 5:
                 self.screen.blit(self.render_text_bateulateral, (80, 200))
                 pygame.display.update()  # atualizar a tela
                 time.sleep(3)
@@ -292,7 +259,7 @@ class Game:
             self.draw_hazard(hzrd, h_x, h_y)
             h_y = h_y + self.VELOCIDADE_HAZARD
 
-            # definindo onde hazard vai aparecer, recomeçando a posição do obstaculo e da faixa
+            # definindo onde hazard vai aparecer
             if h_y > self.HEIGHT:
                 h_y = 0 - self.H_HEIGHT
                 h_x = random.randrange(125, 650 - self.H_HEIGHT)
@@ -301,10 +268,10 @@ class Game:
                 h_passou = h_passou + 1
                 score = h_passou * 10
 
-            # restrições para o game over
-            if y < h_y + self.H_HEIGHT:
-                if x > h_x or x > h_x - 56:
-                    if x < h_x + self.H_WIDTH or x < h_x - 56:
+            # restrições para o game over (Acessando self.player.y e self.player.x encapsulados)
+            if self.player.y < h_y + self.H_HEIGHT:
+                if self.player.x > h_x or self.player.x > h_x - 56:
+                    if self.player.x < h_x + self.H_WIDTH or self.player.x < h_x - 56:
                         self.screen.blit(self.render_text_perdeu, (80, 200))
                         pygame.display.update()
                         time.sleep(3)
@@ -313,14 +280,13 @@ class Game:
             # atualizando a tela
             pygame.display.update()
             clock.tick(2000)
-
         # while self.run
     # loop()
 # Game:
 
 def main():
     # Cria o objeto game e chama o loop básico
-    game = Game("resolution", "fullscreen")
+    game = Game()
     game.loop()
 # main()
 
