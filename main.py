@@ -153,6 +153,7 @@ class Game:
         # Mensagens para o jogador
         self.render_text_bateulateral = my_font.render("COLISÃO!", 0,(255, 255, 255))
         self.render_text_perdeu = my_font.render("GAME OVER!", 0, (255, 0, 0))
+        self.score_font = pygame.font.SysFont(None, SCORE_FONT_SIZE)
 
         # Variáveis para o loop do jogo
         self.run = True
@@ -205,11 +206,14 @@ class Game:
 
     # Informa a quantidade de hazard que passaram e a Pontuação
     def score_card(self, screen, h_passou, score):
-        font = pygame.font.SysFont(None, 35)
-        passou = font.render("Passou: " + str(h_passou), True, (255, 255, 128))
-        score = font.render("Score: " + str(score), True, (253, 231, 32))
-        screen.blit(passou, (0, 50))
-        screen.blit(score, (0, 100))
+        passou = self.score_font.render(
+            "Passou: " + str(h_passou), True, (255, 255, 128)
+        )
+        score = self.score_font.render(
+            "Score: " + str(score), True, (253, 231, 32)
+        )
+        screen.blit(passou, (0, SCORE_LABEL_Y))
+        screen.blit(score, (0, SCORE_VALUE_Y))
     #score_card()
 
     def loop(self):
