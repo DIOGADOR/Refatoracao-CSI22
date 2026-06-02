@@ -325,7 +325,6 @@ class Game:
 
             # atualizando a tela
             pygame.display.update()
-            clock.tick(2000)
         # while self.run
     # loop()
 # Game:
