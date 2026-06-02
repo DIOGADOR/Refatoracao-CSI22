@@ -23,6 +23,7 @@ PLAYER_Y_OFFSET = 125
 PLAYER_SPEED = 3
 BACKGROUND_SPEED = 5
 HAZARD_SPEED = 7
+HAZARD_SPEED_STEP = HAZARD_SPEED + HAZARD_SPEED / 4
 SCORE_FONT_SIZE = 35
 MESSAGE_FONT_SIZE = 100
 MESSAGE_POS_X = 80
@@ -296,10 +297,9 @@ class Game:
                 self.loop()
                 self.run = False
 
-            # adicionando movimento ao hazard
-            h_y = h_y + self.VELOCIDADE_HAZARD / 4
+            # adicionando movimento ao hazard (um único passo por frame)
+            h_y = h_y + HAZARD_SPEED_STEP
             self.draw_hazard(hzrd, h_x, h_y)
-            h_y = h_y + self.VELOCIDADE_HAZARD
 
             # definindo onde hazard vai aparecer
             if h_y > self.HEIGHT:
