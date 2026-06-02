@@ -217,6 +217,25 @@ class Game:
         screen.blit(score, (0, SCORE_VALUE_Y))
     #score_card()
 
+    def _reset_round(
+        self, score, h_passou, hzrd, h_x, h_y, movL_x, movL_y, movR_x, movR_y
+    ):
+        x_inicial = (self.WIDTH - PLAYER_WIDTH) / 2
+        y_inicial = self.HEIGHT - PLAYER_Y_OFFSET
+        self.player = Player(x_inicial, y_inicial)
+        self.mudar_x = 0.0
+        return (
+            0,
+            0,
+            0,
+            random.randrange(HAZARD_SPAWN_X_MIN, HAZARD_SPAWN_X_MAX),
+            HAZARD_START_Y,
+            0,
+            0,
+            MARGIN_RIGHT_X,
+            0,
+        )
+
     def _player_collides_with_hazard(self, h_x, h_y):
         px, py = self.player.x, self.player.y
         return (
