@@ -46,19 +46,15 @@ class Background:
      
     def __init__(self):
 
-        background_fig = pygame.image.load("Images/background.png")
-        background_fig.convert()
-        self.image = background_fig
+        self.image = pygame.image.load("Images/background.png").convert()
 
-        margin_left_fig = pygame.image.load("Images/margin_1.png")
-        margin_left_fig.convert()
+        margin_left_fig = pygame.image.load("Images/margin_1.png").convert()
         margin_left_fig = pygame.transform.scale(
             margin_left_fig, (MARGIN_WIDTH, BACKGROUND_TILE_HEIGHT)
         )
         self.margin_left = margin_left_fig
 
-        margin_right_fig = pygame.image.load("Images/margin_2.png")
-        margin_right_fig.convert()
+        margin_right_fig = pygame.image.load("Images/margin_2.png").convert()
         margin_right_fig = pygame.transform.scale(
             margin_right_fig, (MARGIN_WIDTH, BACKGROUND_TILE_HEIGHT)
         )
@@ -269,12 +265,9 @@ class Game:
         # Criar o Player (o objeto agora guarda e atualiza seu x e y internamente)
         self.player = Player(x_inicial, y_inicial)
 
-        # Criar Harzard_1 a 5
-        self.hazard_1 = Hazard("Images/nave.png", h_x, h_y)
-        self.hazard_2 = Hazard("Images/satelite.png", h_x, h_y)
-        self.hazard_3 = Hazard("Images/cometa.png", h_x, h_y)
-        self.hazard_4 = Hazard("Images/planeta.png", h_x, h_y)
-        self.hazard_5 = Hazard("Images/ameaca.png", h_x, h_y)
+        self.hazards = [
+            Hazard(path, h_x, h_y) for path in HAZARD_IMAGE_PATHS
+        ]
 
         # Inicializamos o relogio e o dt
         clock = pygame.time.Clock()
@@ -331,9 +324,13 @@ class Game:
                 )
                 continue
 
-            # adicionando movimento ao hazard (um único passo por frame)
-            h_y = h_y + HAZARD_SPEED_STEP
-            self.draw_hazard(hzrd, h_x, h_y)
+            active_hazard = self.hazards[hzrd]
+            active_hazard.x = h_x
+            active_hazard.y = h_y
+            active_hazard.update(HAZARD_SPEED_STEP)
+            active_hazard.draw(self.screen)
+            h_x = active_hazard.x
+            h_y = active_hazard.y
 
             # definindo onde hazard vai aparecer
             if h_y > self.HEIGHT:
@@ -341,7 +338,7 @@ class Game:
                 h_x = random.randrange(
                     HAZARD_SPAWN_X_MIN, HAZARD_SPAWN_X_MAX - self.H_HEIGHT
                 )
-                hzrd = random.randint(0, 4)
+                hzrd = random.randint(0, len(self.hazards) - 1)
                 # determinando quantos hazard passaram e a pontuação
                 h_passou = h_passou + 1
                 score = h_passou * 10
