@@ -181,12 +181,6 @@ class Game:
                     self.mudar_x = 0
     # handle_events()
 
-    def elements_update(self, dt):
-        self.background.update(dt)
-    # elements_update()
-
-    # Os métodos inúteis (elements_draw, draw_player e move_background) foram totalmente deletados daqui!
-
     # Informa a quantidade de hazard que passaram e a Pontuação
     def score_card(self, screen, h_passou, score):
         passou = self.score_font.render(
@@ -199,9 +193,7 @@ class Game:
         screen.blit(score, (0, SCORE_VALUE_Y))
     #score_card()
 
-    def _reset_round(
-        self, score, h_passou, hzrd, h_x, h_y, movL_x, movL_y, movR_x, movR_y
-    ):
+    def _reset_round(self):
         x_inicial = (self.WIDTH - PLAYER_WIDTH) / 2
         y_inicial = self.HEIGHT - PLAYER_Y_OFFSET
         self.player = Player(x_inicial, y_inicial)
@@ -271,9 +263,6 @@ class Game:
 
             # Handle Input Events
             self.handle_events()
-
-            # Atualiza Elementos
-            self.elements_update(dt)
 
             # Fundo agora é renderizado e movido em uma única chamada coesa
             self.background.draw(self.screen, movL_x, movL_y, movR_x, movR_y)
