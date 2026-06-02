@@ -31,6 +31,13 @@ MESSAGE_POS_Y = 200
 SCORE_LABEL_Y = 50
 SCORE_VALUE_Y = 100
 FPS_DT_MS = 16
+HAZARD_IMAGE_PATHS = [
+    "Images/nave.png",
+    "Images/satelite.png",
+    "Images/cometa.png",
+    "Images/planeta.png",
+    "Images/ameaca.png",
+]
 
 class Background:
     """
@@ -116,10 +123,11 @@ class Hazard:
         self.y = y
     # __init__()
 
-    # Desenhar Hazard
-    def draw (self, screen, x, y):
-        screen.blit(self.image, (x, y))
-    #draw()
+    def update(self, dy):
+        self.y += dy
+
+    def draw(self, screen):
+        screen.blit(self.image, (self.x, self.y))
 # Hazard:
 
 class Game:
@@ -160,7 +168,7 @@ class Game:
         self.run = True
         self.background = None
         self.player = None
-        self.hazard_1 = self.hazard_2 = self.hazard_3 = self.hazard_4 = self.hazard_5 = None
+        self.hazards = []
         self.mudar_x = 0.0
     # init()
 
@@ -190,20 +198,6 @@ class Game:
     # elements_update()
 
     # Os métodos inúteis (elements_draw, draw_player e move_background) foram totalmente deletados daqui!
-
-    # Desenha Hazard
-    def draw_hazard (self, hzrd, x, y):
-        if hzrd == 0:
-            self.hazard_1.draw(self.screen, x, y)
-        elif hzrd == 1:
-            self.hazard_2.draw(self.screen, x, y)
-        elif hzrd == 2:
-            self.hazard_3.draw(self.screen, x, y)
-        elif hzrd == 3:
-            self.hazard_4.draw(self.screen, x, y)
-        elif hzrd == 4:
-            self.hazard_5.draw(self.screen, x, y)
-    # draw_hazard()
 
     # Informa a quantidade de hazard que passaram e a Pontuação
     def score_card(self, screen, h_passou, score):
@@ -320,10 +314,22 @@ class Game:
                 self.screen.blit(
                     self.render_text_bateulateral, (MESSAGE_POS_X, MESSAGE_POS_Y)
                 )
-                pygame.display.update()  # atualizar a tela
+                pygame.display.update()
                 time.sleep(3)
-                self.loop()
-                self.run = False
+                (
+                    score,
+                    h_passou,
+                    hzrd,
+                    h_x,
+                    h_y,
+                    movL_x,
+                    movL_y,
+                    movR_x,
+                    movR_y,
+                ) = self._reset_round(
+                    score, h_passou, hzrd, h_x, h_y, movL_x, movL_y, movR_x, movR_y
+                )
+                continue
 
             # adicionando movimento ao hazard (um único passo por frame)
             h_y = h_y + HAZARD_SPEED_STEP
