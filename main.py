@@ -61,10 +61,6 @@ class Background:
         self.margin_right = margin_right_fig
     # __init__()
 
-    def update(self, dt):
-        pass
-    # update()
-
     # Renomeado de "move" para "draw"
     # Define posições do Plano de Fundo para criar o movimento
     def draw(self, screen, movL_x, movL_y, movR_x, movR_y):
@@ -85,8 +81,7 @@ class Player:
     Classe Jogador
     """
     def __init__(self, x, y):
-        player_fig = pygame.image.load("Images/player.png")
-        player_fig.convert()
+        player_fig = pygame.image.load("Images/player.png").convert()
         player_fig = pygame.transform.scale(
             player_fig, (PLAYER_WIDTH, PLAYER_HEIGHT)
         )
@@ -109,8 +104,7 @@ class Player:
 class Hazard:
 
     def __init__(self, img, x, y):
-        hazard_fig = pygame.image.load(img)
-        hazard_fig.convert()
+        hazard_fig = pygame.image.load(img).convert()
         hazard_fig = pygame.transform.scale(
             hazard_fig, (HAZARD_WIDTH, HAZARD_HEIGHT)
         )
@@ -147,8 +141,6 @@ class Game:
         pygame.init()
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))  # tamanho da tela
-        self.screen_size = self.screen.get_size()
-
         pygame.mouse.set_visible(0)
         pygame.display.set_caption('Viagem Espacial')
 
