@@ -283,12 +283,14 @@ class Game:
             # Mostrar score
             self.score_card(self.screen, h_passou, score)
 
-            if self.player.x > PLAY_AREA_RIGHT:
-                self.player.x = PLAY_AREA_RIGHT
-            elif self.player.x < PLAY_AREA_LEFT:
-                self.player.x = PLAY_AREA_LEFT
-
-            if self.player.x >= PLAY_AREA_RIGHT or self.player.x <= PLAY_AREA_LEFT:
+            bateu_lateral = (
+                self.player.x > PLAY_AREA_RIGHT or self.player.x < PLAY_AREA_LEFT
+            )
+            if bateu_lateral:
+                if self.player.x > PLAY_AREA_RIGHT:
+                    self.player.x = PLAY_AREA_RIGHT
+                elif self.player.x < PLAY_AREA_LEFT:
+                    self.player.x = PLAY_AREA_LEFT
                 self.screen.blit(
                     self.render_text_bateulateral, (MESSAGE_POS_X, MESSAGE_POS_Y)
                 )
