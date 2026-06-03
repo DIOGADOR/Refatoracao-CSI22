@@ -39,13 +39,13 @@ HAZARD_IMAGE_PATHS = [
     "Images/ameaca.png",
 ]
 
+
 class Background:
     """
     Esta classe define o Plano de Fundo do jogo
     """
-     
-    def __init__(self):
 
+    def __init__(self):
         self.image = pygame.image.load("Images/background.png").convert()
 
         margin_left_fig = pygame.image.load("Images/margin_1.png").convert()
@@ -61,25 +61,23 @@ class Background:
         self.margin_right = margin_right_fig
     # __init__()
 
-    # Renomeado de "move" para "draw"
-    # Define posições do Plano de Fundo para criar o movimento
     def draw(self, screen, movL_x, movL_y, movR_x, movR_y):
-        screen_height = screen.get_height()
         step_height = BACKGROUND_TILE_HEIGHT
         max_offset = -8 * step_height
-        offsets = range(max_offset, screen_height + step_height, step_height)
+        offsets = range(max_offset, screen.get_height() + step_height, step_height)
         for offset in offsets:
             screen.blit(self.image, (movL_x, movL_y + offset))
             screen.blit(self.margin_left, (movL_x, movL_y + offset))
             screen.blit(self.margin_right, (movR_x, movR_y + offset))
-
-    # move()
+    # draw()
 # Background:
+
 
 class Player:
     """
     Classe Jogador
     """
+
     def __init__(self, x, y):
         player_fig = pygame.image.load("Images/player.png").convert()
         player_fig = pygame.transform.scale(
@@ -90,16 +88,15 @@ class Player:
         self.y = y
     # __init__()
 
-    # Atualiza a posição do Player
     def update(self, mudar_x):
         self.x += mudar_x
     # update()
 
-    # Desenhar Player (não recebe mais x e y externos)
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
     # draw()
 # Player:
+
 
 class Hazard:
 
@@ -115,14 +112,16 @@ class Hazard:
 
     def update(self, dy):
         self.y += dy
+    # update()
 
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
+    # draw()
 # Hazard:
+
 
 class Game:
 
-    # Atributos de classe do Game
     WIDTH = SCREEN_WIDTH
     HEIGHT = SCREEN_HEIGHT
     DIREITA = pygame.K_RIGHT
@@ -132,222 +131,212 @@ class Game:
     H_WIDTH = HAZARD_WIDTH
     H_HEIGHT = HAZARD_HEIGHT
 
-    # TAREFA 4.8: Parâmetros size e fullscreen removidos da assinatura
     def __init__(self):
         """
-        Função que inicializa o pygame, define a resolução da tela,
-        caption, e desabilita o mouse.
+        Inicializa o pygame, define a resolução da tela, caption e
+        desabilita o mouse.
         """
         pygame.init()
 
-        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))  # tamanho da tela
+        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.mouse.set_visible(0)
         pygame.display.set_caption('Viagem Espacial')
 
-        # fontes
         my_font = pygame.font.Font("Fonts/Fonte4.ttf", MESSAGE_FONT_SIZE)
-
-        # Mensagens para o jogador
-        self.render_text_bateulateral = my_font.render("COLISÃO!", 0,(255, 255, 255))
+        self.render_text_bateulateral = my_font.render("COLISÃO!", 0, (255, 255, 255))
         self.render_text_perdeu = my_font.render("GAME OVER!", 0, (255, 0, 0))
         self.score_font = pygame.font.SysFont(None, SCORE_FONT_SIZE)
 
-        # Variáveis para o loop do jogo
         self.run = True
         self.background = None
         self.player = None
         self.hazards = []
         self.mudar_x = 0.0
-    # init()
+
+        # Estado do hazard ativo
+        self.hzrd = 0
+        self.h_x = 0
+        self.h_y = 0
+
+        # Estado do scroll do background
+        self.movL_x = 0
+        self.movL_y = 0
+        self.movR_x = MARGIN_RIGHT_X
+        self.movR_y = 0
+
+        # Pontuação
+        self.score = 0
+        self.h_passou = 0
+    # __init__()
 
     def handle_events(self):
         """
-        Trata o evento e toma a ação necessária.
+        Trata os eventos de input do jogador.
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.run = False
 
-            # se clicar em qualquer tecla, entra no if
             if event.type == pygame.KEYDOWN:
                 if event.key == self.ESQUERDA:
                     self.mudar_x = -PLAYER_SPEED
                 if event.key == self.DIREITA:
                     self.mudar_x = PLAYER_SPEED
 
-            # se soltar qualquer tecla, não faz nada
             if event.type == pygame.KEYUP:
                 if event.key == self.ESQUERDA or event.key == self.DIREITA:
                     self.mudar_x = 0
     # handle_events()
 
-    # Informa a quantidade de hazard que passaram e a Pontuação
-    def score_card(self, screen, h_passou, score):
+    def score_card(self):
+        """
+        Renderiza o placar na tela.
+        """
         passou = self.score_font.render(
-            "Passou: " + str(h_passou), True, (255, 255, 128)
+            "Passou: " + str(self.h_passou), True, (255, 255, 128)
         )
         score = self.score_font.render(
-            "Score: " + str(score), True, (253, 231, 32)
+            "Score: " + str(self.score), True, (253, 231, 32)
         )
-        screen.blit(passou, (0, SCORE_LABEL_Y))
-        screen.blit(score, (0, SCORE_VALUE_Y))
-    #score_card()
+        self.screen.blit(passou, (0, SCORE_LABEL_Y))
+        self.screen.blit(score, (0, SCORE_VALUE_Y))
+    # score_card()
 
-    def _reset_round(self):
+    def _init_objects(self):
+        """
+        Instancia todos os objetos do jogo e reinicia o estado da partida.
+        """
+        self.background = Background()
+
         x_inicial = (self.WIDTH - PLAYER_WIDTH) / 2
         y_inicial = self.HEIGHT - PLAYER_Y_OFFSET
         self.player = Player(x_inicial, y_inicial)
-        self.mudar_x = 0.0
-        return (
-            0,
-            0,
-            0,
-            random.randrange(HAZARD_SPAWN_X_MIN, HAZARD_SPAWN_X_MAX),
-            HAZARD_START_Y,
-            0,
-            0,
-            MARGIN_RIGHT_X,
-            0,
-        )
 
-    def _player_collides_with_hazard(self, h_x, h_y):
-        px, py = self.player.x, self.player.y
-        return (
-            px < h_x + self.H_WIDTH
-            and px + PLAYER_WIDTH > h_x
-            and py < h_y + self.H_HEIGHT
-            and py + PLAYER_HEIGHT > h_y
+        self.h_x = random.randrange(HAZARD_SPAWN_X_MIN, HAZARD_SPAWN_X_MAX)
+        self.h_y = HAZARD_START_Y
+        self.hzrd = 0
+        self.hazards = [Hazard(path, self.h_x, self.h_y) for path in HAZARD_IMAGE_PATHS]
+
+        self.movL_x = 0
+        self.movL_y = 0
+        self.movR_x = MARGIN_RIGHT_X
+        self.movR_y = 0
+
+        self.score = 0
+        self.h_passou = 0
+        self.mudar_x = 0.0
+    # _init_objects()
+
+    def _update_physics(self):
+        """
+        Atualiza as posições do background, do player e do hazard ativo.
+        """
+        # Scroll do background
+        self.movL_y += self.VELOCIDADE_BACKGROUND
+        self.movR_y += self.VELOCIDADE_BACKGROUND
+        if self.movL_y > self.HEIGHT and self.movR_y > self.HEIGHT:
+            self.movL_y -= self.HEIGHT
+            self.movR_y -= self.HEIGHT
+
+        # Movimento do player
+        self.player.update(self.mudar_x)
+
+        # Movimento do hazard ativo
+        active_hazard = self.hazards[self.hzrd]
+        active_hazard.x = self.h_x
+        active_hazard.y = self.h_y
+        active_hazard.update(HAZARD_SPEED_STEP)
+        self.h_x = active_hazard.x
+        self.h_y = active_hazard.y
+
+        # Reposiciona hazard ao sair da tela e atualiza pontuação
+        if self.h_y > self.HEIGHT:
+            self.h_y = -self.H_HEIGHT
+            self.h_x = random.randrange(
+                HAZARD_SPAWN_X_MIN, HAZARD_SPAWN_X_MAX - self.H_HEIGHT
+            )
+            self.hzrd = random.randint(0, len(self.hazards) - 1)
+            self.h_passou += 1
+            self.score = self.h_passou * 10
+    # _update_physics()
+
+    def _check_collisions(self):
+        """
+        Verifica colisões laterais e com hazards. Encerra ou reinicia conforme
+        o tipo de colisão.
+        """
+        # Colisão com a lateral
+        bateu_lateral = (
+            self.player.x > PLAY_AREA_RIGHT or self.player.x < PLAY_AREA_LEFT
         )
+        if bateu_lateral:
+            if self.player.x > PLAY_AREA_RIGHT:
+                self.player.x = PLAY_AREA_RIGHT
+            else:
+                self.player.x = PLAY_AREA_LEFT
+            self.screen.blit(
+                self.render_text_bateulateral, (MESSAGE_POS_X, MESSAGE_POS_Y)
+            )
+            pygame.display.update()
+            time.sleep(3)
+            self._init_objects()
+            return
+
+        # Colisão com hazard (game over)
+        px, py = self.player.x, self.player.y
+        colidiu = (
+            px < self.h_x + self.H_WIDTH
+            and px + PLAYER_WIDTH > self.h_x
+            and py < self.h_y + self.H_HEIGHT
+            and py + PLAYER_HEIGHT > self.h_y
+        )
+        if colidiu:
+            self.screen.blit(
+                self.render_text_perdeu, (MESSAGE_POS_X, MESSAGE_POS_Y)
+            )
+            pygame.display.update()
+            time.sleep(3)
+            self.run = False
+    # _check_collisions()
+
+    def _render(self):
+        """
+        Desenha todos os elementos visuais na tela.
+        """
+        self.background.draw(
+            self.screen, self.movL_x, self.movL_y, self.movR_x, self.movR_y
+        )
+        self.player.draw(self.screen)
+        self.hazards[self.hzrd].x = self.h_x
+        self.hazards[self.hzrd].y = self.h_y
+        self.hazards[self.hzrd].draw(self.screen)
+        self.score_card()
+    # _render()
 
     def loop(self):
         """
-        Laço principal
+        Laço principal: inicializa os objetos e executa o ciclo do jogo.
         """
-        score = 0
-        h_passou = 0
-
-        # variáveis para movimento de Plano de Fundo/Background
-        hzrd = 0
-        h_x = random.randrange(HAZARD_SPAWN_X_MIN, HAZARD_SPAWN_X_MAX)
-        h_y = HAZARD_START_Y
-
-        # movimento da margem esquerda
-        movL_x = 0
-        movL_y = 0
-
-        # movimento da margem direita
-        movR_x = MARGIN_RIGHT_X
-        movR_y = 0
-
-        # Criar o Plano de fundo
-        self.background = Background()
-
-        # Posicao INICIAL do Player
-        x_inicial = (self.WIDTH - PLAYER_WIDTH) / 2
-        y_inicial = self.HEIGHT - PLAYER_Y_OFFSET
-
-        # Criar o Player (o objeto agora guarda e atualiza seu x e y internamente)
-        self.player = Player(x_inicial, y_inicial)
-
-        self.hazards = [
-            Hazard(path, h_x, h_y) for path in HAZARD_IMAGE_PATHS
-        ]
-
-        # Inicializamos o relogio e o dt
+        self._init_objects()
         clock = pygame.time.Clock()
-        dt = FPS_DT_MS
 
-        # assim iniciamos o loop principal do programa
         while self.run:
-            clock.tick(1000 / dt)
-
-            # Handle Input Events
+            clock.tick(1000 / FPS_DT_MS)
             self.handle_events()
-
-            # Fundo agora é renderizado e movido em uma única chamada coesa
-            self.background.draw(self.screen, movL_x, movL_y, movR_x, movR_y)
-
-            # incrementa eixo Y para rolar o fundo
-            movL_y = movL_y + self.VELOCIDADE_BACKGROUND
-            movR_y = movR_y + self.VELOCIDADE_BACKGROUND
-
-            # se a imagem ultrapassar a extremidade da tela, move de volta
-            if movL_y > self.HEIGHT and movR_y > self.HEIGHT:
-                movL_y -= self.HEIGHT
-                movR_y -= self.HEIGHT
-
-            # O Player processa sua física e desenha a si mesmo
-            self.player.update(self.mudar_x)
-            self.player.draw(self.screen)
-
-            # Mostrar score
-            self.score_card(self.screen, h_passou, score)
-
-            bateu_lateral = (
-                self.player.x > PLAY_AREA_RIGHT or self.player.x < PLAY_AREA_LEFT
-            )
-            if bateu_lateral:
-                if self.player.x > PLAY_AREA_RIGHT:
-                    self.player.x = PLAY_AREA_RIGHT
-                elif self.player.x < PLAY_AREA_LEFT:
-                    self.player.x = PLAY_AREA_LEFT
-                self.screen.blit(
-                    self.render_text_bateulateral, (MESSAGE_POS_X, MESSAGE_POS_Y)
-                )
-                pygame.display.update()
-                time.sleep(3)
-                (
-                    score,
-                    h_passou,
-                    hzrd,
-                    h_x,
-                    h_y,
-                    movL_x,
-                    movL_y,
-                    movR_x,
-                    movR_y,
-                ) = self._reset_round()
-                continue
-
-            active_hazard = self.hazards[hzrd]
-            active_hazard.x = h_x
-            active_hazard.y = h_y
-            active_hazard.update(HAZARD_SPEED_STEP)
-            active_hazard.draw(self.screen)
-            h_x = active_hazard.x
-            h_y = active_hazard.y
-
-            # definindo onde hazard vai aparecer
-            if h_y > self.HEIGHT:
-                h_y = 0 - self.H_HEIGHT
-                h_x = random.randrange(
-                    HAZARD_SPAWN_X_MIN, HAZARD_SPAWN_X_MAX - self.H_HEIGHT
-                )
-                hzrd = random.randint(0, len(self.hazards) - 1)
-                # determinando quantos hazard passaram e a pontuação
-                h_passou = h_passou + 1
-                score = h_passou * 10
-
-            if self._player_collides_with_hazard(h_x, h_y):
-                self.screen.blit(
-                    self.render_text_perdeu, (MESSAGE_POS_X, MESSAGE_POS_Y)
-                )
-                pygame.display.update()
-                time.sleep(3)
-                self.run = False
-
-            # atualizando a tela
+            self._update_physics()
+            self._render()
+            self._check_collisions()
             pygame.display.update()
         # while self.run
     # loop()
 # Game:
 
+
 def main():
-    # Cria o objeto game e chama o loop básico
     game = Game()
     game.loop()
 # main()
 
-# Chama a função main
+
 if __name__ == '__main__':
     main()
